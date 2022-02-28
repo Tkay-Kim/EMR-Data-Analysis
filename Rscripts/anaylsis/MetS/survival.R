@@ -5,12 +5,12 @@ library(epiR)
 library(ggplot2)
 library(dplyr)
 
-rm(list=ls())
-dt = fread("MetSforsurv.csv", encoding = "UTF-8", na.strings = c("", NA))
-dt[,sum(MetS==1)]
+rm(list = ls())
+dt <- fread("MetSforsurv.csv", encoding = "UTF-8", na.strings = c("", NA))
+dt[ , sum(MetS==1)]
 # 변수 설정
 names(dt)
-nox<- names(dt)[grep("^nox", names(dt))]
+nox <- names(dt)[grep("^nox", names(dt))]
 fact_var = c("PATNUM", "MetS", "EXMKND", "gr", "SEXTYP", "smoke",
              "F1", "F2", "F3", "F4", "WAIST", 
              "HDL", "TRIGLY", "BP", "agegr", "drink",
@@ -33,8 +33,9 @@ dtb = dt[,.SD[1], by = PATNUM]
 vars = c("SEXTYP", "agegr", "smoke", "drink", "Exercise", 
          "F1", "F2", "F3", "F4")
 
+
 maketable<-function(dtb, vars){
-  for (i in 1:length(vars)){
+  for (i in seq_len(length(vars))){
   if(i==1) {
   res <- list(0)
   a = table(dtb[,get(vars[i])])
@@ -61,13 +62,14 @@ vars = c("SEXTYP", "agegr", "smoke", "drink", "Exercise",
 res = list()
 # 단변량
 
-for (i in 1:length(vars)){
+for (i in seq_len(length(vars))){
   cox <- coxph(Surv(start, stop, MetS) ~ get(vars[i]), id = PATNUM, data = dt)
   res[[i]] <- summary(cox)$conf.int
 }
 
 res1 = do.call("rbind", res)
 res1 = round(res1, 4)
+
 
 
 cox1 <- coxph(Surv(start, stop, MetS) ~ SEXTYP + agegr + drink + 
@@ -118,7 +120,7 @@ noxinfo
 
 # 단변량 노출
 
-for (i in 1: nrow(noxinfo)){
+for (i in seq_len(nrow(noxinfo))){
   try(cox<- coxph(Surv(start,stop, MetS) ~ get(noxinfo[i, nox]), data = dt, id = PATNUM), silent = T)
   noxinfo[i,ecoef:=round(summary(cox)$conf.int[1],4)]
   noxinfo[i,lower:=round(summary(cox)$conf.int[3],4)]
@@ -151,18 +153,18 @@ noxinfo = noxinfo[order(-count)]
  setcolorder(noxinfo, c("NOXCOD",  "NOXNME", "count", "ecoef", "lower", "upper", "p-value"))
 
 # 다변량 노출
-i=1
-for (i in 1: nrow(noxinfo)){
+
+for (i in seq_len(nrow(noxinfo))){
   
   try(cox<- coxph(Surv(start,stop, MetS)~ SEXTYP + agegr+
                     drink + Exercise + smoke +
                     F1 + F2 + F3 + F4 +
                     get(noxinfo[i, NOXCOD]), data = dt, id = PATNUM), silent = T)
 
-  noxinfo[i,`ecoef(multi)`:=round(summary(cox)$conf.int[14,1],4)]
-  noxinfo[i,`lower(multi)`:=round(summary(cox)$conf.int[14,3],4)]
-  noxinfo[i,`upper(multi)`:=round(summary(cox)$conf.int[14,4],4)]
-  noxinfo[i,`p-value(multi)`:=round(summary(cox)$coef[14,6],4)]
+  noxinfo[i, `ecoef(multi)`:=round(summary(cox)$conf.int[14, 1], 4)]
+  noxinfo[i, `lower(multi)`:=round(summary(cox)$conf.int[14, 3], 4)]
+  noxinfo[i, `upper(multi)`:=round(summary(cox)$conf.int[14, 4], 4)]
+  noxinfo[i, `p-value(multi)`:=round(summary(cox)$coef[14, 6], 4)]
 }    
 noxinfo
 
@@ -210,24 +212,19 @@ for (i in 1:36){
       SM<-round(epi.interaction(cox2, param = "dummy" , coef = 23:25, type = "S", conf.level = 0.95),4)
       APM<-round(epi.interaction(cox2, param = "dummy" , coef = 23:25, type = "APAB", conf.level = 0.95)*100,1)
       
-      res[[paste( noxinfo[i, NOXNME],"/",noxinfo[j, NOXNME])]] <-c(noxinfo[i, NOXNME], noxinfo[j, NOXNME],
+      res[[paste( noxinfo[i, NOXNME], "/", noxinfo[j, NOXNME])]] <-c(noxinfo[i, NOXNME], noxinfo[j, NOXNME],
                                                                    table(dt$noxcom)[2:4],
-                                                                   as.vector(t(round(cbind(summary(cox1)$conf.int[,c(1, 3, 4)],summary(cox1)$coef[,5]),4))),
+                                                                   as.vector(t(round(cbind(summary(cox1)$conf.int[, c(1, 3, 4)], summary(cox1)$coef[, 5]), 4))),
                                                                    RERI, S, AP,
-                                                                   as.vector(t(round(cbind(summary(cox2)$conf.int[23:25,c(1, 3, 4)],summary(cox2)$coef[23:25,5]),4))),
+                                                                   as.vector(t(round(cbind(summary(cox2)$conf.int[23:25,c(1, 3, 4)], summary(cox2)$coef[23:25, 5]), 4))),
                                                                    RERIM, SM, APM)
-      
-      
-  
-      
-      
     }
   }
 }
 
-a = do.call("rbind", res)
-a<-data.table(a)
-names(a) <-c("Aname", "Bname", "Acount", "Bcount", "Ccount",
+a <- do.call("rbind", res)
+a <- data.table(a)
+names(a) <- c("Aname", "Bname", "Acount", "Bcount", "Ccount",
              "e1", "l1", "u1", "p1",
              "e2", "l2", "u2", "p2",
              "e3", "l3", "u3", "p3",
