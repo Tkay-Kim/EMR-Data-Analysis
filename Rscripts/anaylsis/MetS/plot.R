@@ -6,7 +6,7 @@ library(dplyr)
 
 # 그림
 rm(list = ls())
-Res <- fread("./Result_MetS/res_confounders.csv")
+Res <- fread("./Result_MetS/res_confounders.csv") # nolint
 names(Res) <- c("e1", "e-", "l1", "u1", "e2", "e--", "l2", "u2")
 str(Res)
 num_var <- names(Res)
@@ -36,8 +36,8 @@ setkey(res, "names")
 setkey(Res, "factor")
 a <- Res[res]
 a <- a[order(id)]
-a[l1 > 1, label0 := "*" ]
-a[l2 > 1, label1 := "*" ]
+a[l1 > 1, label0 := "*"]
+a[l2 > 1, label1 := "*"]
 
 psole <- ggplot(a, aes(x = e1, y = factor, xmin = l1, xmax = u1)) +
   geom_point() + geom_errorbarh(height = 0.2) +
@@ -47,7 +47,7 @@ psole <- ggplot(a, aes(x = e1, y = factor, xmin = l1, xmax = u1)) +
   labs(x = "A. Simple", y = "") +
   xlim(0, 4) + # x축의 눈금표시 간격을 설정
   theme_classic() +
-  theme(axis.title.y=element_blank(),
+  theme(axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank())
 
@@ -59,7 +59,7 @@ pmulti <- ggplot(a, aes(x = e2, y = factor, xmin = l2, xmax = u2)) +
   geom_text(size = 5, aes(label = label1), vjust = 0.1, col = "red") +
   labs(x = "B. Multiple") +
   xlim(0, 4) + ## x축의 눈금표시 간격을 설정
-  theme_classic()+
+  theme_classic() +
   theme(axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank())
@@ -69,18 +69,19 @@ psole + pmulti
 
 # exposures ---------------------------------------------------------------
 
-noxinfo <-fread("./Result_MetS/res_exposures.csv")
-noxinfo[`p-value`<0.05, label0 := "*"]
-noxinfo[`p-value(multi)`<0.05, label1 := "*"]
+noxinfo <- fread("./Result_MetS/res_exposures.csv")
+noxinfo[`p-value` < 0.05, label0 := "*"]
+noxinfo[`p-value(multi)` < 0.05, label1 := "*"]
 
-psole <- ggplot(noxinfo, aes(x = ecoef, y = NOXNME, xmin = lower, xmax = upper )) +
+psole <- ggplot(noxinfo, aes(x = ecoef, y = NOXNME,
+ xmin = lower, xmax = upper)) +
   geom_point() +
   geom_errorbarh(height = 0.2) +
   geom_vline(xintercept = 1, color = "red") +
-  scale_y_discrete(limits = rev(noxinfo$NOXNME))+
+  scale_y_discrete(limits = rev(noxinfo$NOXNME)) +
   geom_text(size = 5, aes(label = label0), vjust = 0.1, col = "red") +
   labs(x = "A. Simple (Exposure-only)", y = "") +
-  scale_x_continuous(breaks = seq(0, 10, by = 1))+ ## x축의 눈금표시 간격을 설정
+  scale_x_continuous(breaks = seq(0, 10, by = 1)) + ## x축의 눈금표시 간격을 설정
   theme_classic() +
   theme(axis.title.y = element_blank(),
         axis.text.y = element_blank(),
@@ -88,15 +89,15 @@ psole <- ggplot(noxinfo, aes(x = ecoef, y = NOXNME, xmin = lower, xmax = upper )
   coord_cartesian(xlim = c(0, 4))
 
 
-pmulti <- ggplot(noxinfo, aes(x = `ecoef(multi)`, y = NOXNME, xmin = `lower(multi)`,
-                             xmax = `upper(multi)` )) +
+pmulti <- ggplot(noxinfo, aes(x = `ecoef(multi)`, y = NOXNME,
+  xmin = `lower(multi)`, xmax = `upper(multi)`)) +
   geom_point() +
   geom_errorbarh(height = 0.2) +
   geom_vline(xintercept = 1, color = "red") +
-  scale_y_discrete(limits = rev(noxinfo$NOXNME))+
+  scale_y_discrete(limits = rev(noxinfo$NOXNME)) +
   geom_text(size = 5, aes(label = label1), vjust = 0.1, col = "red") +
   labs(x = "B. Mutiple (Exposure + Confonunders)", y = "") +
-  scale_x_continuous(breaks = seq(0, 10, by = 1))+ ## x축의 눈금표시 간격을 설정
+  scale_x_continuous(breaks = seq(0, 10, by = 1)) + ## x축의 눈금표시 간격을 설정
   theme_classic() +
   theme(axis.title.y = element_blank(),
         axis.text.y = element_blank(),
@@ -111,73 +112,66 @@ psole + pmulti
 rm(list = ls())
 library(data.table)
 
-dt <-fread("Rdata/diabetes/rescom.csv")
+dt <- fread("Rdata/diabetes/rescom.csv")
 b <- dt[l3 > 1 | l6 > 1, ]
-b <- b[e1 != 0 & e2 ! 0  & e3 != 0 & e4 != 0 & e5 != 0 & e6 != 0,]
+b <- b[e1 != 0 & e2 != 0  & e3 != 0 & e4 != 0 & e5 != 0 & e6 != 0, ]
 names(b)
 
-b[RERI > 0, ADD := "†"]
-b[mul > 1, MUL := "‡"]
-b[RERIM > 0, `ADD(M)` := "†"]
-b[Mmul > 1, `MUL(M)` := "‡"]
+b[RERI > 0, ADD := "†"] # nolint
+b[mul > 1, MUL := "‡"] # nolint
+b[RERIM > 0, `ADD(M)` := "†"] # nolint
+b[Mmul > 1, `MUL(M)` := "‡"] # nolint
 
 
 # log scale plot
 
 library(ggplot2)
-plotCI <- function(i){
+plotCI <- function(i) { # nolint
   p <- ggplot(b, aes(x = get(paste0("e", i)), y = name,
-                    xmin = get(paste0("l", i)), xmax = get(paste0("u", i))))+
+                    xmin = get(paste0("l", i)), xmax = get(paste0("u", i)))) +
     geom_point() +
     geom_errorbarh(height = 0.2) +
     geom_vline(xintercept = 1, color = "red") +
-    scale_y_discrete(limits = rev(b$name))+
+    scale_y_discrete(limits = rev(b$name)) +
     labs(x = "", y = "") +
-    theme_classic() +      
+    theme_classic() +
     theme(axis.title.y = element_blank(),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank())
-  
-  if(i==1){
-    p = p + labs(x = "Simple, Risk factor A") + 
+  if (i == 1) {
+    p <- p + labs(x = "Simple, Risk factor A") +
       coord_cartesian(xlim = c(0.04, 25)) +
-      scale_x_continuous(breaks = c(1,5,10,15,20,25), trans = "log")
-  }  
-  
-  if(i==4){
-    p = p + labs(x = "Multiple, Risk factor A") +
-      coord_cartesian(xlim = c(0.04, 25)) +
-      scale_x_continuous(breaks = c(1,5,10,15,20,25), trans = "log")
-    
-  }  
-  
-  if(i==2){
-    p = p +  labs(x = "Simple, Risk factor B") +
-      coord_cartesian(xlim = c(0.04, 25)) +
-      scale_x_continuous(breaks = c(1,5,10,15,20,25), trans = "log")
+      scale_x_continuous(breaks = c(1, 5, 10, 15, 20, 25), trans = "log")
   }
-  if(i == 5){
-    p = p +  labs(x = "Multiple, Risk factor B") +
+  if (i == 4) {
+    p <- p + labs(x = "Multiple, Risk factor A") +
       coord_cartesian(xlim = c(0.04, 25)) +
-      scale_x_continuous(breaks = c(1,5,10,15,20,25), trans = "log")
+      scale_x_continuous(breaks = c(1, 5, 10, 15, 20, 25), trans = "log")
   }
-  
-  if(i == 3){
-    p <- p + labs(x="Simple, Risk factor A & B")+
+  if (i == 2) {
+    p <- p +  labs(x = "Simple, Risk factor B") +
+      coord_cartesian(xlim = c(0.04, 25)) +
+      scale_x_continuous(breaks = c(1, 5, 10, 15, 20, 25), trans = "log")
+  }
+  if (i == 5) {
+    p <- p +  labs(x = "Multiple, Risk factor B") +
+      coord_cartesian(xlim = c(0.04, 25)) +
+      scale_x_continuous(breaks = c(1, 5, 10, 15, 20, 25), trans = "log")
+  }
+  if (i == 3) {
+    p <- p + labs(x = "Simple, Risk factor A & B") +
       coord_cartesian(xlim = c(0.04, 360)) +
       scale_x_continuous(breaks = c(1, 5, 10, 50, 100, 300), trans = "log") +
-      geom_text(size = 2, aes(label = ADD), vjust = -0.35, hjust =  -0.3) +
-      geom_text(size = 2, aes(label = MUL), vjust = -0.35, hjust =  -1.5) 
-  }  
-  
-  if(i == 6){
-    p <- p + labs(x="Multiple, Risk factor A & B") + 
+      geom_text(size = 2, aes(label = ADD), vjust = -0.35, hjust = -0.3) +
+      geom_text(size = 2, aes(label = MUL), vjust = -0.35, hjust = -1.5)
+  }
+  if (i == 6) {
+    p <- p + labs(x = "Multiple, Risk factor A & B") +
       coord_cartesian(xlim = c(0.04, 360)) +
       scale_x_continuous(breaks = c(1, 5, 10, 50, 100, 300), trans = "log") +
       geom_text(size = 2, aes(label = `ADD(M)`), vjust = -0.35, hjust = -0.3) +
-      geom_text(size = 2, aes(label = `MUL(M)`), vjust = -0.35, hjust = -1.5) 
+      geom_text(size = 2, aes(label = `MUL(M)`), vjust = -0.35, hjust = -1.5)
   }
-  
   return(p)
 }
 b[, min(l1)]
@@ -207,5 +201,5 @@ p5 <- plotCI(5);p5
 p6 <- plotCI(6);p6
 
 library(patchwork)
-p1+p2+p3
-p4+p5+p6
+p1 + p2 + p3
+p4 + p5 + p6
