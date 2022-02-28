@@ -1,8 +1,13 @@
+
+install.packages("data.table")
+install.packages("patchwork")
+install.packages("ggplot2")
+install.packages("dplyr")
 library(data.table)
 library(patchwork)
-library(epiR)
 library(ggplot2)
 library(dplyr)
+
 
 # 그림
 rm(list = ls())
@@ -104,13 +109,13 @@ pmulti <- ggplot(noxinfo, aes(x = `ecoef(multi)`, y = NOXNME,
         axis.ticks.y = element_blank()) +
   coord_cartesian(xlim = c(0, 4))
 
-
 psole + pmulti
 
 
 # 복합노출 그래프 ----------------------------------------------------------------
 rm(list = ls())
 library(data.table)
+
 
 dt <- fread("Rdata/diabetes/rescom.csv")
 b <- dt[l3 > 1 | l6 > 1, ]
